@@ -48,6 +48,13 @@ jobs:
           echo "开始部署模型：${{ github.event.inputs.model }}"
           ollama run ${{ github.event.inputs.model }}
 
+      - name: 加入Tailscale私有网络
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
         
