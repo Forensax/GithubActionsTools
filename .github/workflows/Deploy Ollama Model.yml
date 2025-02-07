@@ -38,6 +38,17 @@ jobs:
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
 
+      - name: 加入Tailscale私有网络
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:githubactions
+
+      - name: 查看IP地址
+        run: |
+          ip a
+
       - name: 安装Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
@@ -46,13 +57,6 @@ jobs:
         run: |
           echo "开始部署模型：${{ github.event.inputs.model }}"
           ollama run ${{ github.event.inputs.model }}
-
-      - name: 加入Tailscale私有网络
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:githubactions
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
