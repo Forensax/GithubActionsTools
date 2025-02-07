@@ -1,0 +1,53 @@
+name: Deploy Ollama Model
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: '模型名称'
+        required: true
+        default: 'deepseek-r1:14b'
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 迁出代码
+        uses: actions/checkout@v3
+        
+      - name: 检查服务器配置
+        run: |
+          echo -e "已知CPU型号(性能降序): 7763，8370C，8272CL，8171M，E5-2673\n"
+          echo "--------------------------CPU信息--------------------------"
+          echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+          echo "CPU核心数量: $(nproc)"
+          echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
+          echo "--------------------------内存信息--------------------------"
+          echo "已安装内存详细信息:"
+          echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
+          echo "--------------------------硬盘信息--------------------------"
+          echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+          echo "--------------------------网络信息--------------------------"
+          curl -s -4 ipinfo.io | jq -r '
+            "IP地址           \(.ip)\n" +
+            "所在城市         \(.city)\n" +
+            "所在区域         \(.region)\n" +
+            "国家             \(.country)\n" +
+            "地理位置         \(.loc)\n" +
+            "组织             \(.org)\n" +
+            "邮政编码         \(.postal)\n" +
+            "所在时区         \(.timezone)\n"'
+
+          
+      - name: 安装Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: 部署选定模型
+        run: |
+          echo "开始部署模型：${{ github.event.inputs.model }}"
+          ollama run ${{ github.event.inputs.model }}
+
+      - name: 启动SSH终端
+        uses: mxschmitt/action-tmate@v3
+        
