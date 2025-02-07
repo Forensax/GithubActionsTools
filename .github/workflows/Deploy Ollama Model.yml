@@ -38,7 +38,6 @@ jobs:
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
 
-          
       - name: 安装Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
@@ -53,7 +52,7 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+          tags: tag:githubactions
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
