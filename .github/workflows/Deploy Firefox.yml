@@ -48,7 +48,7 @@ jobs:
       - name: 安装Firefox
         run: |
           docker run -d --name=firefox -p 5800:5800 -e LANG=zh_CN.UTF-8 -e ENABLE_CJK_FONT=1 jlesage/firefox
-
+          echo "地址：IP:5800"
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
 
