@@ -50,6 +50,7 @@ jobs:
           git clone https://github.com/MHSanaei/3x-ui.git
           cd 3x-ui
           docker compose up -d
+          echo "地址：IP:2053 admin admin"
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
