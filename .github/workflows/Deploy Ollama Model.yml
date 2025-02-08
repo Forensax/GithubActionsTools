@@ -62,7 +62,7 @@ jobs:
       - name: 部署Open WebUI
         run: |
           echo "开始部署Open WebUI:"
-          docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+          docker run -d -p 3000:8080 --network=host -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
