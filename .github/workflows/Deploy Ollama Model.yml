@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "开始部署Open WebUI:"
           docker run -d --network=host -v open-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name open-webui --restart always ghcr.io/open-webui/open-webui:main
-
+          echo "地址：IP:8080"
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
         
