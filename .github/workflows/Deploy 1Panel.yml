@@ -63,10 +63,9 @@ jobs:
       - name: 安装1Panel
         run: |
           curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh
-          printf "2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sudo bash quick_start.sh
+          printf "2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sudo bash quick_start.sh
           LOCAL_IP=${{ steps.get_local_ip.outputs.local_ip }}
-          echo $LOCAL_IP
-          sudo 1pctl user-info
+          echo $(sudo 1pctl user-info)
 
       - name: 发送通知
         uses: appleboy/telegram-action@master
