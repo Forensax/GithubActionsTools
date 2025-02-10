@@ -18,28 +18,38 @@ jobs:
       - name: 检查服务器配置
         id: check_server
         run: |
-          echo -e "已知CPU型号(性能降序): 7763，8370C，8272CL，8171M，E5-2673\n"
-          echo "--------------------------CPU信息--------------------------"
-          echo "CPU物理数量: $(cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l)"
-          echo "CPU核心数量: $(nproc)"
-          echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
-          echo "--------------------------内存信息--------------------------"
-          echo "已安装内存详细信息:"
-          echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
-          echo "--------------------------硬盘信息--------------------------"
-          echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-          echo "--------------------------网络信息--------------------------"
-          curl -s -4 ipinfo.io | jq -r '
-            "IP地址           \(.ip)\n" +
-            "所在城市         \(.city)\n" +
-            "所在区域         \(.region)\n" +
-            "国家             \(.country)\n" +
-            "地理位置         \(.loc)\n" +
-            "组织             \(.org)\n" +
-            "邮政编码         \(.postal)\n" +
-            "所在时区         \(.timezone)\n"'
+          CONFIG=$(cat <<EOF
+已知CPU型号(性能降序): 7763，8370C，8272CL，8171M，E5-2673
 
-          echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
+--------------------------CPU信息--------------------------
+CPU物理数量: $(cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l)
+CPU核心数量: $(nproc)
+CPU型号信息: $(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print \$2}')
+
+--------------------------内存信息--------------------------
+已安装内存详细信息:
+$(sudo lshw -short -C memory | grep GiB)
+
+--------------------------硬盘信息--------------------------
+硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)
+$(df -hT)
+
+--------------------------网络信息--------------------------
+$(curl -s -4 ipinfo.io | jq -r '
+"IP地址           \(.ip)\n" +
+"所在城市         \(.city)\n" +
+"所在区域         \(.region)\n" +
+"国家             \(.country)\n" +
+"地理位置         \(.loc)\n" +
+"组织             \(.org)\n" +
+"邮政编码         \(.postal)\n" +
+"所在时区         \(.timezone)\n')
+EOF
+)
+          # 将所有配置信息保存为输出变量（多行文本需使用特殊语法）
+          echo "server_config<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONFIG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
@@ -53,6 +63,7 @@ jobs:
         id: get_local_ip
         run: |
           ip a
+          # 过滤提取以 100. 开头的本地 IP 地址
           LOCAL_IP=$(ip -o -4 addr list | awk '/100\./ {print $4}' | cut -d/ -f1)
           echo "提取到本地 IP: ${LOCAL_IP}"
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
@@ -78,11 +89,14 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            部署完成通知：
-            公网IP: ${{ steps.check_server.outputs.public_ip }}
-            本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
+            大模型部署完成：
             模型: ${{ github.event.inputs.model }}
-            Open WebUI 地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
+            
+            服务器配置信息:
+            ${{ steps.check_server.outputs.server_config }}
+            
+            本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
+            WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
