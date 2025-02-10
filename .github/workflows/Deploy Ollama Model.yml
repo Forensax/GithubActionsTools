@@ -19,37 +19,15 @@ jobs:
         id: check_server
         run: |
           echo -e "已知CPU型号(性能降序): 7763，8370C，8272CL，8171M，E5-2673\n"
-      
           echo "--------------------------CPU信息--------------------------"
-          CPU_PHYSICAL_COUNT=$(cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l)
-          CPU_CORE_COUNT=$(nproc)
-          CPU_MODEL=$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')
-          echo "CPU物理数量: $CPU_PHYSICAL_COUNT"
-          echo "CPU核心数量: $CPU_CORE_COUNT"
-          echo -e "CPU型号信息: $CPU_MODEL\n"
-      
-          echo "cpu_physical_count=$CPU_PHYSICAL_COUNT" >> $GITHUB_OUTPUT
-          echo "cpu_core_count=$CPU_CORE_COUNT" >> $GITHUB_OUTPUT
-          echo "cpu_model=$CPU_MODEL" >> $GITHUB_OUTPUT
-      
+          echo "CPU物理数量: $(cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l)"
+          echo "CPU核心数量: $(nproc)"
+          echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
           echo "--------------------------内存信息--------------------------"
-          MEMORY_INFO=$(sudo lshw -short -C memory | grep GiB)
           echo "已安装内存详细信息:"
-          echo -e "$MEMORY_INFO\n"
-      
-          echo "memory_info=$MEMORY_INFO" >> $GITHUB_OUTPUT
-      
+          echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
           echo "--------------------------硬盘信息--------------------------"
-          DISK_COUNT=$(ls /dev/sd* | grep -v [1-9] | wc -l)
-          DISK_USAGE=$(df -hT)
-          echo "硬盘数量: $DISK_COUNT"
-          echo "$DISK_USAGE"
-      
-          echo "disk_count=$DISK_COUNT" >> $GITHUB_OUTPUT
-          echo "disk_usage<<EOF" >> $GITHUB_OUTPUT
-          echo "$DISK_USAGE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      
+          echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
           echo "--------------------------网络信息--------------------------"
           curl -s -4 ipinfo.io > raw_net_info
           cat raw_net_info | jq -r '
@@ -61,7 +39,7 @@ jobs:
             "组织             \(.org)\n" +
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
-      
+
           echo "public_ip=$(cat raw_net_info | jq -r '.ip')" >> $GITHUB_OUTPUT
           echo "city=$(cat raw_net_info | jq -r '.city')" >> $GITHUB_OUTPUT
           echo "region=$(cat raw_net_info | jq -r '.region')" >> $GITHUB_OUTPUT
@@ -70,7 +48,6 @@ jobs:
           echo "org=$(cat raw_net_info | jq -r '.org')" >> $GITHUB_OUTPUT
           echo "postal=$(cat raw_net_info | jq -r '.postal')" >> $GITHUB_OUTPUT
           echo "timezone=$(cat raw_net_info | jq -r '.timezone')" >> $GITHUB_OUTPUT
-
           
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
@@ -110,29 +87,17 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             大模型部署完成：
-            --------------------------
-            CPU物理数量: ${{ steps.check_server.outputs.cpu_physical_count }}
-            CPU核心数量: ${{ steps.check_server.outputs.cpu_core_count }}
-            CPU型号信息: ${{ steps.check_server.outputs.cpu_model }}
-            --------------------------
-            已安装内存详细信息: ${{ steps.check_server.outputs.memory_info }}
-            --------------------------
-            硬盘数量: ${{ steps.check_server.outputs.disk_count }}
-            硬盘使用情况:
-            ${{ steps.check_server.outputs.disk_usage }}
-            --------------------------
             公网IP: ${{ steps.check_server.outputs.public_ip }}
-                城市: ${{ steps.check_server.outputs.city }}
-                区域: ${{ steps.check_server.outputs.region }}
-                国家: ${{ steps.check_server.outputs.country }}
-                位置: ${{ steps.check_server.outputs.loc }}
-                组织: ${{ steps.check_server.outputs.org }}
-                邮编: ${{ steps.check_server.outputs.postal }}
-                时区: ${{ steps.check_server.outputs.timezone }}
-            --------------------------
+              城市: ${{ steps.check_server.outputs.city }}
+              区域: ${{ steps.check_server.outputs.region }}
+              国家: ${{ steps.check_server.outputs.country }}
+              位置: ${{ steps.check_server.outputs.loc }}
+              组织: ${{ steps.check_server.outputs.org }}
+              邮编: ${{ steps.check_server.outputs.postal }}
+              时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
             模型: ${{ github.event.inputs.model }}
-            地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
+            WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
