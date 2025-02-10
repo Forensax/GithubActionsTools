@@ -103,5 +103,5 @@ jobs:
             节点地址：
             ss://YWVzLTEyOC1nY206eGxac2NueFVwSUhxb2R0WkVTYUt5c2orSzdoQzhUTkV2bzYxRmc4M3luUT0@${{ steps.get_local_ip.outputs.local_ip }}:43926?type=tcp#SS
 
-      - name: Setup tmate session
+      - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
