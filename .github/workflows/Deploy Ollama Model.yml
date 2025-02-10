@@ -29,7 +29,8 @@ jobs:
           echo "--------------------------硬盘信息--------------------------"
           echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
           echo "--------------------------网络信息--------------------------"
-          curl -s -4 ipinfo.io | jq -r '
+          curl -s -4 ipinfo.io > raw_net_info
+          cat raw_net_info | jq -r '
             "IP地址           \(.ip)\n" +
             "所在城市         \(.city)\n" +
             "所在区域         \(.region)\n" +
@@ -39,8 +40,15 @@ jobs:
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
 
-          echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
-
+          echo "public_ip=$(cat raw_net_info | jq -r '.ip')" >> $GITHUB_OUTPUT
+          echo "city=$(cat raw_net_info | jq -r '.city')" >> $GITHUB_OUTPUT
+          echo "region=$(cat raw_net_info | jq -r '.region')" >> $GITHUB_OUTPUT
+          echo "country=$(cat raw_net_info | jq -r '.country')" >> $GITHUB_OUTPUT
+          echo "loc=$(cat raw_net_info | jq -r '.loc')" >> $GITHUB_OUTPUT
+          echo "org=$(cat raw_net_info | jq -r '.org')" >> $GITHUB_OUTPUT
+          echo "postal=$(cat raw_net_info | jq -r '.postal')" >> $GITHUB_OUTPUT
+          echo "timezone=$(cat raw_net_info | jq -r '.timezone')" >> $GITHUB_OUTPUT
+          
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
         with:
@@ -80,6 +88,13 @@ jobs:
           message: |
             大模型部署完成：
             公网IP: ${{ steps.check_server.outputs.public_ip }}
+              城市: ${{ steps.check_server.outputs.city }}
+              区域: ${{ steps.check_server.outputs.region }}
+              国家: ${{ steps.check_server.outputs.country }}
+              位置: ${{ steps.check_server.outputs.loc }}
+              组织: ${{ steps.check_server.outputs.org }}
+              邮编: ${{ steps.check_server.outputs.postal }}
+              时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
             模型: ${{ github.event.inputs.model }}
             WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
