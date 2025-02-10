@@ -65,9 +65,10 @@ jobs:
       - name: 安装3X-UI
         run: |
           git clone https://github.com/MHSanaei/3x-ui.git
+          cp DB/SS 3x-ui/db/x-ui.db
           cd 3x-ui
           docker compose up -d
-          echo "地址：IP:2053 admin admin"
+          
 
       - name: 发送通知
         uses: appleboy/telegram-action@master
@@ -87,8 +88,10 @@ jobs:
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
             模型: ${{ github.event.inputs.model }}
             WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:2053
-              用户: admin
-              密码: admin
+              用户: 3a219e0b79
+              密码: fe1084c390
+            节点地址：
+            ss://YWVzLTEyOC1nY206eGxac2NueFVwSUhxb2R0WkVTYUt5c2orSzdoQzhUTkV2bzYxRmc4M3luUT0@${{ steps.get_local_ip.outputs.local_ip }}:43926?type=tcp#SS
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
