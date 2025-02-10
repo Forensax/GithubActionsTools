@@ -70,9 +70,9 @@ jobs:
           sudo 1pctl user-info > panel_info.txt
           PANEL_URL=$(awk '{sub(/\$LOCAL_IP/, "${{ steps.get_local_ip.outputs.local_ip }}"); print; exit}' panel_info.txt)
           echo $PANEL_URL
-          PANEL_USER=$(grep '面板用户' panel_info.txt | awk -F': ' '{print $2}')
+          PANEL_USER=$(awk 'NR==2 {print; exit}' panel_info.txt)
           echo $PANEL_USER
-          PANEL_PASSWORD=$(grep '面板密码' panel_info.txt | awk -F': ' '{print $2}')
+          PANEL_PASSWORD=$(awk 'NR==3 {print; exit}' panel_info.txt)
           echo $PANEL_PASSWORD
           
           echo "panel_url=${PANEL_URL}" >> $GITHUB_OUTPUT
@@ -95,9 +95,9 @@ jobs:
             邮编: ${{ steps.check_server.outputs.postal }}
             时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
-            WEB地址: ${{ steps.install_1panel.outputs.panel_url }}
-            面板用户: ${{ steps.install_1panel.outputs.panel_user }}
-            面板密码: ${{ steps.install_1panel.outputs.panel_password }}
+            ${{ steps.install_1panel.outputs.panel_url }}
+            ${{ steps.install_1panel.outputs.panel_user }}
+            ${{ steps.install_1panel.outputs.panel_password }}
           
       - name: 启动SSH服务
         uses: mxschmitt/action-tmate@v3
