@@ -69,8 +69,11 @@ jobs:
           # 捕获1Panel登录信息并设置为输出变量
           sudo 1pctl user-info > panel_info.txt
           PANEL_URL=$(grep '面板地址' panel_info.txt | awk -F': ' '{print $2}')
+          echo $PANEL_URL
           PANEL_USER=$(grep '面板用户' panel_info.txt | awk -F': ' '{print $2}')
+          echo $PANEL_USER
           PANEL_PASSWORD=$(grep '面板密码' panel_info.txt | awk -F': ' '{print $2}')
+          echo $PANEL_PASSWORD
           
           echo "panel_url=${PANEL_URL}" >> $GITHUB_OUTPUT
           echo "panel_user=${PANEL_USER}" >> $GITHUB_OUTPUT
