@@ -61,10 +61,15 @@ jobs:
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
 
       - name: 安装1Panel
+        id: install_1panel
         run: |
           curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh
           printf "2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sudo bash quick_start.sh
-          sudo 1pctl user-info
+          PANEL_INFO=$(sudo 1pctl user-info)
+          echo "$PANEL_INFO"
+          
+          PANEL_URL=$(echo "$PANEL_INFO" | grep '面板地址' | awk '{print $2}')
+          echo "panel_url=${PANEL_URL}" >> $GITHUB_OUTPUT
 
       - name: 发送通知
         uses: appleboy/telegram-action@master
@@ -82,7 +87,7 @@ jobs:
               邮编: ${{ steps.check_server.outputs.postal }}
               时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
-            WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
-          
+            WEB地址: ${{ steps.install_1panel.outputs.panel_url }}
+
       - name: 启动SSH服务
         uses: mxschmitt/action-tmate@v3
