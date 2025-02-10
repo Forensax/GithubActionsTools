@@ -51,7 +51,7 @@ jobs:
             "所在时区         \(.timezone)\n"' > netinfo
 
           netinfo=$(cat netinfo)
-          echo "netinfo=$(cat netinfo)" >> $GITHUB_OUTPUT
+          echo "netinfo=$netinfo" >> $GITHUB_OUTPUT
           echo "public_ip=$(cat rawnetinfo | jq -r '.ip')" >> $GITHUB_OUTPUT
 
       - name: 加入Tailscale私有网络
