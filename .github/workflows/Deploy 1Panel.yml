@@ -61,15 +61,20 @@ jobs:
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
 
       - name: 安装1Panel
-        id: install_1panel
+        id: install_1panel  # 添加步骤ID用于输出变量
         run: |
           curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh
           printf "2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sudo bash quick_start.sh
-          PANEL_INFO=$(sudo 1pctl user-info)
-          echo "$PANEL_INFO"
           
-          PANEL_URL=$(echo "$PANEL_INFO" | grep '面板地址' | awk '{print $2}')
+          # 捕获1Panel登录信息并设置为输出变量
+          sudo 1pctl user-info > panel_info.txt
+          PANEL_URL=$(grep '面板地址' panel_info.txt | awk -F': ' '{print $2}')
+          PANEL_USER=$(grep '面板用户' panel_info.txt | awk -F': ' '{print $2}')
+          PANEL_PASSWORD=$(grep '面板密码' panel_info.txt | awk -F': ' '{print $2}')
+          
           echo "panel_url=${PANEL_URL}" >> $GITHUB_OUTPUT
+          echo "panel_user=${PANEL_USER}" >> $GITHUB_OUTPUT
+          echo "panel_password=${PANEL_PASSWORD}" >> $GITHUB_OUTPUT
 
       - name: 发送通知
         uses: appleboy/telegram-action@master
@@ -79,15 +84,17 @@ jobs:
           message: |
             大模型部署完成：
             公网IP: ${{ steps.check_server.outputs.public_ip }}
-              城市: ${{ steps.check_server.outputs.city }}
-              区域: ${{ steps.check_server.outputs.region }}
-              国家: ${{ steps.check_server.outputs.country }}
-              位置: ${{ steps.check_server.outputs.loc }}
-              组织: ${{ steps.check_server.outputs.org }}
-              邮编: ${{ steps.check_server.outputs.postal }}
-              时区: ${{ steps.check_server.outputs.timezone }}
+            城市: ${{ steps.check_server.outputs.city }}
+            区域: ${{ steps.check_server.outputs.region }}
+            国家: ${{ steps.check_server.outputs.country }}
+            位置: ${{ steps.check_server.outputs.loc }}
+            组织: ${{ steps.check_server.outputs.org }}
+            邮编: ${{ steps.check_server.outputs.postal }}
+            时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
             WEB地址: ${{ steps.install_1panel.outputs.panel_url }}
-
+            面板用户: ${{ steps.install_1panel.outputs.panel_user }}
+            面板密码: ${{ steps.install_1panel.outputs.panel_password }}
+          
       - name: 启动SSH服务
         uses: mxschmitt/action-tmate@v3
