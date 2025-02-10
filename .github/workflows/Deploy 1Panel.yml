@@ -58,6 +58,7 @@ jobs:
           ip a
           LOCAL_IP=$(ip -o -4 addr list | awk '/100\./ {print $4}' | cut -d/ -f1)
           echo "提取到本地 IP: ${LOCAL_IP}"
+          echo $LOCAL_IP
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
 
       - name: 安装1Panel
