@@ -29,10 +29,7 @@ jobs:
           echo "--------------------------硬盘信息--------------------------"
           echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
           echo "--------------------------网络信息--------------------------"
-          # 获取 ipinfo.io 返回的完整网络信息 JSON 字符串
-          NET_INFO=$(curl -s -4 ipinfo.io)
-          # 输出完整网络信息（可选，仅供日志查看）
-          echo "$NET_INFO" | jq -r '
+          curl -s -4 ipinfo.io | jq -r '
             "IP地址           \(.ip)\n" +
             "所在城市         \(.city)\n" +
             "所在区域         \(.region)\n" +
@@ -41,20 +38,8 @@ jobs:
             "组织             \(.org)\n" +
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
-          # 从 JSON 中提取公网 IP
-          PUBLIC_IP=$(echo "$NET_INFO" | jq -r '.ip')
-          # 过滤需要的信息：所在城市、所在区域、国家、地理位置、组织、邮政编码、所在时区
-          NETWORK_INFO=$(echo "$NET_INFO" | jq -r '
-            "所在城市         \(.city)\n" +
-            "所在区域         \(.region)\n" +
-            "国家             \(.country)\n" +
-            "地理位置         \(.loc)\n" +
-            "组织             \(.org)\n" +
-            "邮政编码         \(.postal)\n" +
-            "所在时区         \(.timezone)"')
-          # 将提取的信息写入输出变量，供后续步骤使用
-          echo "public_ip=${PUBLIC_IP}" >> $GITHUB_OUTPUT
-          echo "network_info=${NETWORK_INFO}" >> $GITHUB_OUTPUT
+
+          echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
 
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
@@ -68,7 +53,6 @@ jobs:
         id: get_local_ip
         run: |
           ip a
-          # 过滤提取以 100. 开头的本地 IP 地址
           LOCAL_IP=$(ip -o -4 addr list | awk '/100\./ {print $4}' | cut -d/ -f1)
           echo "提取到本地 IP: ${LOCAL_IP}"
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
@@ -99,9 +83,6 @@ jobs:
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
             模型: ${{ github.event.inputs.model }}
             WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
-
-            网络信息：
-            ${{ steps.check_server.outputs.network_info }}
 
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
