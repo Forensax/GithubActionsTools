@@ -14,12 +14,13 @@ jobs:
     steps:
       - name: 迁出代码
         uses: actions/checkout@v3
-        
+
       - name: 检查服务器配置
+        id: check_server
         run: |
           echo -e "已知CPU型号(性能降序): 7763，8370C，8272CL，8171M，E5-2673\n"
           echo "--------------------------CPU信息--------------------------"
-          echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+          echo "CPU物理数量: $(cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l)"
           echo "CPU核心数量: $(nproc)"
           echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
           echo "--------------------------内存信息--------------------------"
@@ -38,6 +39,8 @@ jobs:
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
 
+          echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
+
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
         with:
@@ -47,8 +50,12 @@ jobs:
           version: latest
 
       - name: 查看IP地址
+        id: get_local_ip
         run: |
           ip a
+          LOCAL_IP=$(ip -o -4 addr list | awk '/100\./ {print $4}' | cut -d/ -f1)
+          echo "提取到本地 IP: ${LOCAL_IP}"
+          echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
 
       - name: 安装Ollama
         run: |
@@ -64,6 +71,18 @@ jobs:
           echo "开始部署Open WebUI:"
           docker run -d --network=host -v open-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name open-webui --restart always ghcr.io/open-webui/open-webui:main
           echo "地址：IP:8080"
+
+      - name: 发送通知
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            部署完成通知：
+            公网IP: ${{ steps.check_server.outputs.public_ip }}
+            本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
+            模型: ${{ github.event.inputs.model }}
+            Open WebUI 地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
+
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
-        
