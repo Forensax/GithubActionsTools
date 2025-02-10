@@ -41,6 +41,7 @@ jobs:
             "所在时区         \(.timezone)\n"'
 
           echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
+          echo "network_info=${NETWORK_INFO}" >> $GITHUB_OUTPUT
 
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
@@ -57,7 +58,6 @@ jobs:
           LOCAL_IP=$(ip -o -4 addr list | awk '/100\./ {print $4}' | cut -d/ -f1)
           echo "提取到本地 IP: ${LOCAL_IP}"
           echo "local_ip=${LOCAL_IP}" >> $GITHUB_OUTPUT
-          echo "network_info=${NETWORK_INFO}" >> $GITHUB_OUTPUT
           
       - name: 安装Ollama
         run: |
