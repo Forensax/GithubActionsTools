@@ -68,11 +68,11 @@ jobs:
           
           # 捕获1Panel登录信息并设置为输出变量
           sudo 1pctl user-info > panel_info.txt
-          PANEL_URL=$(awk '{sub(/\$LOCAL_IP/, "${{ steps.get_local_ip.outputs.local_ip }}"); print; exit}' panel_info.txt)
+          PANEL_URL=$(awk '{sub(/\$LOCAL_IP/, "${{ steps.get_local_ip.outputs.local_ip }}"); gsub(/面板地址：/, ""); print; exit}' panel_info.txt)
           echo $PANEL_URL
-          PANEL_USER=$(awk 'NR==2 {print; exit}' panel_info.txt)
+          PANEL_USER=$(sed -n '2s/面板用户：//gp' panel_info.txt)
           echo $PANEL_USER
-          PANEL_PASSWORD=$(awk 'NR==3 {print; exit}' panel_info.txt)
+          PANEL_PASSWORD=$(sed -n '3s/面板密码：//gp' panel_info.txt)
           echo $PANEL_PASSWORD
           
           echo "panel_url=${PANEL_URL}" >> $GITHUB_OUTPUT
