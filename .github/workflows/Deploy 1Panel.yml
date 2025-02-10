@@ -85,19 +85,19 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            大模型部署完成：
+            1Panel部署完成：
             公网IP: ${{ steps.check_server.outputs.public_ip }}
-            城市: ${{ steps.check_server.outputs.city }}
-            区域: ${{ steps.check_server.outputs.region }}
-            国家: ${{ steps.check_server.outputs.country }}
-            位置: ${{ steps.check_server.outputs.loc }}
-            组织: ${{ steps.check_server.outputs.org }}
-            邮编: ${{ steps.check_server.outputs.postal }}
-            时区: ${{ steps.check_server.outputs.timezone }}
+              城市: ${{ steps.check_server.outputs.city }}
+              区域: ${{ steps.check_server.outputs.region }}
+              国家: ${{ steps.check_server.outputs.country }}
+              位置: ${{ steps.check_server.outputs.loc }}
+              组织: ${{ steps.check_server.outputs.org }}
+              邮编: ${{ steps.check_server.outputs.postal }}
+              时区: ${{ steps.check_server.outputs.timezone }}
             本地IP: ${{ steps.get_local_ip.outputs.local_ip }}
-            ${{ steps.install_1panel.outputs.panel_url }}
-            ${{ steps.install_1panel.outputs.panel_user }}
-            ${{ steps.install_1panel.outputs.panel_password }}
+            面板地址: ${{ steps.install_1panel.outputs.panel_url }}
+              用户: ${{ steps.install_1panel.outputs.panel_user }}
+              密码: ${{ steps.install_1panel.outputs.panel_password }}
           
       - name: 启动SSH服务
         uses: mxschmitt/action-tmate@v3
