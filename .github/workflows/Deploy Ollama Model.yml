@@ -50,7 +50,9 @@ jobs:
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"' > netinfo
 
-          echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
+          netinfo=$(cat netinfo)
+          echo "netinfo=$(cat netinfo)" >> $GITHUB_OUTPUT
+          echo "public_ip=$(cat rawnetinfo | jq -r '.ip')" >> $GITHUB_OUTPUT
 
       - name: 加入Tailscale私有网络
         uses: tailscale/github-action@v3
@@ -96,6 +98,6 @@ jobs:
             WEB地址: http://${{ steps.get_local_ip.outputs.local_ip }}:8080
             
             网络信息：
-            $(cat netinfo)
+            ${{ steps.check_server.outputs.netinfo }}
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
