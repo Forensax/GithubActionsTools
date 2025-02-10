@@ -29,8 +29,8 @@ jobs:
           echo "--------------------------硬盘信息--------------------------"
           echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
           echo "--------------------------网络信息--------------------------"
-          NET_INFO=$(curl -s -4 ipinfo.io)
-          echo "$NET_INFO" | jq -r '
+          RAW_NET_INFO=$(curl -s -4 ipinfo.io)
+          echo "$RAW_NET_INFO" | jq -r '
             "IP地址           \(.ip)\n" +
             "所在城市         \(.city)\n" +
             "所在区域         \(.region)\n" +
@@ -39,7 +39,15 @@ jobs:
             "组织             \(.org)\n" +
             "邮政编码         \(.postal)\n" +
             "所在时区         \(.timezone)\n"'
-
+          NETWORK_INFO=$(echo "$NET_INFO" | jq -r '
+            "所在城市         \(.city)\n" +
+            "所在区域         \(.region)\n" +
+            "国家             \(.country)\n" +
+            "地理位置         \(.loc)\n" +
+            "组织             \(.org)\n" +
+            "邮政编码         \(.postal)\n" +
+            "所在时区         \(.timezone)"')
+          echo "$NETWORK_INFO"
           echo "public_ip=$(curl -s -4 ipinfo.io | jq -r '.ip')" >> $GITHUB_OUTPUT
           echo "network_info=${NETWORK_INFO}" >> $GITHUB_OUTPUT
 
@@ -88,6 +96,5 @@ jobs:
             
             网络信息：
             ${{ steps.check_server.outputs.network_info }}
-
       - name: 启动SSH终端
         uses: mxschmitt/action-tmate@v3
