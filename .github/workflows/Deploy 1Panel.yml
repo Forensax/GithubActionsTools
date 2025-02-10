@@ -68,7 +68,7 @@ jobs:
           
           # 捕获1Panel登录信息并设置为输出变量
           sudo 1pctl user-info > panel_info.txt
-          PANEL_URL=$(grep '面板地址' panel_info.txt | awk -F': ' '{print $2}')
+          PANEL_URL=$(awk '{sub(/\$LOCAL_IP/, "${{ steps.get_local_ip.outputs.local_ip }}"); print; exit}' panel_info.txt)
           echo $PANEL_URL
           PANEL_USER=$(grep '面板用户' panel_info.txt | awk -F': ' '{print $2}')
           echo $PANEL_USER
